@@ -25,6 +25,12 @@ public class Assert {
 		}
 	}
 	
+	public static void lengthLargerOrEquals(String[] list, int length) {
+		if (list == null || list.length < length) {
+			Common.error("参数长度不能小于" + length);
+		}
+	}
+	
 	public static void hasArrayContent(Object[] arr, String tips) {
 		if (null == arr || arr.length == 0) {
 			logger.error(tips);

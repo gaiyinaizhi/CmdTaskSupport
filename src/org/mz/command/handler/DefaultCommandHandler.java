@@ -53,4 +53,20 @@ public class DefaultCommandHandler extends AbstractCommandHandler {
 		return this.savedParams.get(paramName);
 	}
 
+	/**
+	 * 提示信息
+	 * 
+	 * @param message
+	 */
+	public void showMessage(String[] message) {
+		StringBuilder finalString = new StringBuilder();
+		if (message == null || message.length == 0) {
+			return;
+		}
+		for (String str : message) {
+			finalString.append(str);
+		}
+		getTaskInfo().alert(finalString.toString());
+	}
+
 }

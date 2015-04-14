@@ -105,6 +105,7 @@ public class Command {
 		desc.clazz = cls;
 		desc.methodName = methodName;
 		desc.dynamicParam = true;
+		desc.hasParam = true;
 
 		checkNecessary(desc);
 		return desc;
@@ -204,7 +205,7 @@ public class Command {
 	public String execute(Object instance, String[] params) {
 		return CommandFactory.executeCommand(instance, this, params);
 	}
-
+	
 	@Override
 	public String toString() {
 		return "Command [commandName=" + commandName + ", clazz=" + clazz + ", methodName=" + methodName

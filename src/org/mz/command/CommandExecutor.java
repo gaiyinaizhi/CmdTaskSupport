@@ -8,6 +8,7 @@ import java.util.Map;
 import java.util.Stack;
 
 import org.mz.command.bean.Command;
+import org.mz.command.definition.DefaultCommands;
 import org.mz.command.factory.CommandFactory;
 import org.mz.common.util.Assert;
 import org.mz.common.util.Common;
@@ -55,7 +56,7 @@ public class CommandExecutor {
 			}
 
 		} catch (Exception e) {
-			Common.error(new StringBuilder("第").append(this.line).append("行执行出错：").append(e.getMessage())
+			Common.error(new StringBuilder("任务：").append(taskFile).append(" 第").append(this.line).append("行执行出错：").append(e.getMessage())
 					.toString(), e);
 		}
 	}
@@ -110,6 +111,7 @@ public class CommandExecutor {
 	 * @return
 	 */
 	private String bracketsMatcherExecutor(String tokenString, int startIndex) {
+		logger.debug("start analyse token string {} from {}", tokenString, startIndex);
 		int len = tokenString.length();
 
 		Stack<Integer> leftPosStack = new Stack<Integer>();
@@ -124,6 +126,7 @@ public class CommandExecutor {
 				break;
 			case RIGHT_TOKEN:
 				singleCommand = tokenString.substring(leftPosStack.peek() + 1, index);
+				logger.debug("hit the right bracket. the singleCommand is: {}", singleCommand);
 				String newTokenString = new StringBuilder(tokenString.substring(0, leftPosStack.peek()))
 						.append(PARAM_TOKEN).append(executeOneCommand(singleCommand)).append(PARAM_TOKEN)
 						.append(tokenString.substring(index + 1)).toString();
@@ -153,7 +156,7 @@ public class CommandExecutor {
 		for (; index < len; index++) {
 			symbol = tokenString.charAt(index);
 			if (symbol == '"') {
-				return ++index;
+				return index;
 			}
 		}
 
@@ -183,7 +186,11 @@ public class CommandExecutor {
 					startPosStack.push(index);
 				} else {
 					int start = startPosStack.pop();
-					params.add(leftLineString.substring(start + 1, index));
+					String param = leftLineString.substring(start + 1, index);
+					if (param.startsWith("$")) {
+						param = DefaultCommands.GET_PARAM.execute(getCmdInstance(DefaultCommands.GET_PARAM), new String[]{param.substring(1)});
+					}
+					params.add(param);
 					if (!cmd.isDynamicParam()
 							&& (!cmd.isParamArray() || params.size() == cmd.getAcceptArrayLength())) {
 						break;
@@ -192,10 +199,12 @@ public class CommandExecutor {
 			}
 		}
 
-		if (!cmd.isDynamicParam() && cmd.isParamArray() && cmd.getAcceptArrayLength() != -1) {
-			Assert.lengthEqual(params, cmd.getAcceptArrayLength());
-		} else if (!cmd.isDynamicParam() && !cmd.isParamArray()) {
-			Assert.lengthEqual(params, 1);
+		if (!cmd.isDynamicParam()) {
+			if (cmd.isParamArray() && cmd.getAcceptArrayLength() != -1) {
+				Assert.lengthEqual(params, cmd.getAcceptArrayLength());
+			} else if (!cmd.isParamArray()) {
+				Assert.lengthEqual(params, 1);
+			}
 		}
 
 		return params.toArray(new String[params.size()]);
@@ -208,6 +217,10 @@ public class CommandExecutor {
 	 * @return
 	 */
 	public Object getCmdInstance(final Command cmd) {
+		return getCmdInstance(cmd, this.task);
+	}
+	
+	public static Object getCmdInstance(final Command cmd, final Object task) {
 		String className = cmd.getClazz().getName();
 		Object instance = null;
 		if (!(pooledInstances.containsKey(className) && pooledInstances.get(className).containsKey(
@@ -220,12 +233,12 @@ public class CommandExecutor {
 							private static final long serialVersionUID = 1L;
 
 							{
-								put(task, getInstance(cmd.getClazz()));
+								put(task, getInstance(cmd.getClazz(), task));
 							}
 						});
 					}
 					if (!pooledInstances.get(className).containsKey(task)) {
-						pooledInstances.get(className).put(task, getInstance(cmd.getClazz()));
+						pooledInstances.get(className).put(task, getInstance(cmd.getClazz(), task));
 					}
 				} catch (Exception e) {
 					Common.error(new StringBuilder(cmd.getCommandName()).append("执行失败，获取Handler失败！")
@@ -241,9 +254,9 @@ public class CommandExecutor {
 		return instance;
 	}
 	
-	private Object getInstance(Class<?> cls) throws Exception {
+	private static Object getInstance(Class<?> cls, Object task) throws Exception {
 		Constructor<?> construct = cls.getConstructor(Task.class);
-		return construct.newInstance(this.task);
+		return construct.newInstance(task);
 	}
 	
 }

@@ -15,7 +15,7 @@ import org.slf4j.LoggerFactory;
 
 public class Task {
 
-	public static final String COMMANDS_DEFINITION_PACKAGE = "org.mz.selenium.command.definition";
+	public static final String COMMANDS_DEFINITION_PACKAGE = "org.mz.command.definition";
 	public static final String DEFAULT_CONFIG = "config.properties";
 
 	protected static final Logger logger = LoggerFactory.getLogger(Task.class);

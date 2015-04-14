@@ -112,7 +112,7 @@ public class CommandFactory {
 	 */
 	public static String executeCommand(Object instance, Command cmd, String[] params) {
 		if (logger.isDebugEnabled()) {
-			logger.debug("Start execute command {} with params {}.", cmd.getCommandName(),
+			logger.debug("Start execute command {} with params {}.", cmd,
 					Arrays.toString(params));
 		}
 		Object result = null;
@@ -120,8 +120,6 @@ public class CommandFactory {
 			if (cmd.isDynamicParam()) {
 				if (null == params || params.length == 0) {
 					result = invokeNoParam(instance, cmd);
-				} else if (params.length == 1) {
-					result = invokeStringParam(instance, cmd, params);
 				} else {
 					result = invokeStringArrayParam(instance, cmd, params);
 				}
@@ -135,7 +133,7 @@ public class CommandFactory {
 				result = invokeNoParam(instance, cmd);
 			}
 
-		} catch (Exception e) {
+		} catch (Throwable e) {
 			Common.error("execute command " + cmd.getCommandName() + " failed!", e);
 		}
 
@@ -183,11 +181,11 @@ public class CommandFactory {
 	 * @return
 	 * @throws Exception
 	 */
-	@SuppressWarnings("all")
+	//@SuppressWarnings("all")
 	private static Object invokeStringArrayParam(Object instance, Command cmd, String[] params)
 			throws Exception {
 		Method invokedMethod = cmd.getClazz().getMethod(cmd.getMethodName(), String[].class);
-		return invokedMethod.invoke(instance, params);
+		return invokedMethod.invoke(instance, (Object) params);
 	}
 
 }

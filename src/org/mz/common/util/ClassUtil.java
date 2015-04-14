@@ -39,12 +39,12 @@ public class ClassUtil {
 		try {
 			dirs = Thread.currentThread().getContextClassLoader().getResources(packageDirName);
 			//dirs = ClassUtil.class.getClassLoader().getResources(packageDirName);
-			logger.debug("loaded url result is: {} by {}.", dirs.hasMoreElements(), packageDirName);
+			//logger.debug("loaded url result is: {} by {}.", dirs.hasMoreElements(), packageDirName);
 			// 循环迭代下去
 			while (dirs.hasMoreElements()) {
 				// 获取下一个元素
 				URL url = dirs.nextElement();
-				logger.debug("loaded url is: {}. package from {}.", url, url.getProtocol());
+				//logger.debug("loaded url is: {}. package from {}.", url, url.getProtocol());
 				// 得到协议的名称
 				String protocol = url.getProtocol();
 				// 如果是以文件的形式保存在服务器上
@@ -67,7 +67,7 @@ public class ClassUtil {
 							// 获取jar里的一个实体 可以是目录 和一些jar包里的其他文件 如META-INF等文件
 							JarEntry entry = entries.nextElement();
 							String name = entry.getName();
-							logger.debug("file from jar is: {}.", name);
+							//logger.debug("file from jar is: {}.", name);
 							// 如果是以/开头的
 							if (name.charAt(0) == '/') {
 								// 获取后面的字符串

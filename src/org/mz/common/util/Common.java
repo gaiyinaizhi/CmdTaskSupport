@@ -14,6 +14,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -188,13 +189,25 @@ public class Common {
 		if (StringUtil.isEmpty(object)) {
 			return null;
 		}
+		
+		if (StringUtils.endsWithIgnoreCase(object, ".json")) {
+			return getJsonFromFile(object);
+		}
 		try {
+			object = object.replace("'", "\""); // 脚本中以单引号'分隔，标准是以双引号"，json配置文件中还是以双引号
 			return mapper.readValue(object, Map.class);
-		} catch (JsonParseException e) {
-		} catch (JsonMappingException e) {
-		} catch (IOException e) {
+		} catch (Exception e) {
 		}
 
-		return null;
+		return getJsonFromFile(object);
+	}
+	
+	@SuppressWarnings("unchecked")
+	public static Map<String, String> getJsonFromFile(String fileName) {
+		try {
+			return mapper.readValue(new File(DATA_PATH + fileName), Map.class);
+		} catch (Exception e) {
+			return null;
+		}
 	}
 }

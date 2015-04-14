@@ -21,4 +21,7 @@ public interface DefaultCommands extends CommandDefinition {
 
 	/** 获取元素属性值， 属性名 */
 	Command GET_PARAM = Command.createStrParam(DefaultCommandHandler.class, "getParam");
+	
+	/** 显示信息 */
+	Command SHOW_MESSAGE = Command.createDynParam(DefaultCommandHandler.class, "showMessage");
 }
